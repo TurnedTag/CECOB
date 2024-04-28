@@ -73,8 +73,21 @@ const getUser = async (req, res) => {
   }
 };
 
+const logout = async (req, res) => {
+  res.cookie("token", "", {
+    path: "/",
+    httpOnly: true,
+    expires: new Date(0),
+    sameSite: "none",
+    secure: true,
+  });
+
+  return res.status(200).send("Sessão de usuario encerrada");
+};
+
 module.exports = {
   register,
   login,
   getUser,
+  logout,
 };
