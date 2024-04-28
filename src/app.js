@@ -2,6 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
+const cookieParser = require("cookie-parser");
 
 const userRoutes = require("./api/routes/userRoutes");
 
@@ -9,6 +10,7 @@ dotenv.config();
 
 const app = express();
 app.use(bodyParser.json());
+app.use(cookieParser());
 
 mongoose
   .connect(process.env.MONGO_URI, {})

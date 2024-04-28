@@ -40,14 +40,41 @@ const login = async (req, res) => {
     const token = jwt.sign({ id: user._id }, process.env.SECRET, {
       expiresIn: "1d",
     });
-    res.status(200).send({ user, token });
+
+    res.cookie("token", token, {
+      path: "/",
+      httpOnly: true,
+      expires: new Date(Date.now() + 1000 * 86400),
+      sameSite: "none",
+      secure: true,
+    });
+
+    const { _id, username } = user;
+
+    res.status(200).send({ _id, username, email, token });
   } catch (error) {
     console.log(error);
     res.status(500).send(error);
   }
 };
 
+const getUser = async (req, res) => {
+  const user = await User.findById(req.user._id);
+
+  if (user) {
+    const { _id, name, email } = user;
+    res.status(200).send({
+      _id,
+      name,
+      email,
+    });
+  } else {
+    res.status(400).send("Usuario não encontrado");
+  }
+};
+
 module.exports = {
   register,
   login,
+  getUser,
 };
