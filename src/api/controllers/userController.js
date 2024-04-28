@@ -85,9 +85,24 @@ const logout = async (req, res) => {
   return res.status(200).send("Sessão de usuario encerrada");
 };
 
+const loginStatus = async (req, res) => {
+  const token = req.cookies.token;
+
+  if (!token) {
+    return res.send(false);
+  }
+
+  const verified = jwt.verify(token, process.env.SECRET);
+
+  if (verified) return res.status(200).send(true);
+
+  return res.status(200).send(false);
+};
+
 module.exports = {
   register,
   login,
   getUser,
   logout,
+  loginStatus,
 };
