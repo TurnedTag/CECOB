@@ -46,7 +46,24 @@ const listActivities = async (req, res) => {
   }
 };
 
+const getActivity = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const activity = await Activity.findById(id).populate("author", "username");
+
+    if (!activity) {
+      return res.status(404).send({ message: "Activity not found" });
+    }
+
+    res.status(200).json(activity);
+  } catch (error) {
+    res.status(500).send({ message: error.message || "Internal server error" });
+  }
+};
+
 module.exports = {
   createActivity,
   listActivities,
+  getActivity,
 };
