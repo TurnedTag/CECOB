@@ -62,8 +62,40 @@ const getActivity = async (req, res) => {
   }
 };
 
+const likeActivity = async (req, res) => {
+  const { id } = req.params;
+
+  const activity_id = id;
+  const user_id = req.user._id;
+
+  try {
+    const activity = await Activity.findById(activity_id);
+    if (!activity) {
+      return res.status(400).send({ message: "Activity not found" });
+    }
+
+    const index = activity.likes.indexOf(user_id);
+
+    if (index === -1) {
+      activity.likes.push(user_id);
+    } else {
+      activity.likes.splice(index, 1);
+    }
+
+    await activity.save();
+
+    res.status(200).json({
+      message: index === -1 ? "Already liked" : "Like removed",
+      likesCount: activity.likes.length,
+    });
+  } catch (error) {
+    res.status(500).send({ message: "Internal server error" });
+  }
+};
+
 module.exports = {
   createActivity,
   listActivities,
   getActivity,
+  likeActivity,
 };

@@ -75,10 +75,12 @@ const activitySchema = new mongoose.Schema(
       type: Map,
       of: Boolean,
     },
-    likes: {
-      type: Map,
-      of: Boolean,
-    },
+    likes: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
     description: {
       type: String,
       required: true,
