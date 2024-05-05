@@ -5,6 +5,7 @@ const dotenv = require("dotenv");
 const cookieParser = require("cookie-parser");
 
 const userRoutes = require("./api/routes/userRoutes");
+const activityRoutes = require("./api/routes/activityRoutes");
 
 dotenv.config();
 
@@ -18,5 +19,6 @@ mongoose
   .catch((err) => console.log(err));
 
 app.use("/api/users", userRoutes);
+app.use("/api", activityRoutes);
 
 module.exports = app;
