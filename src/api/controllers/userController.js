@@ -20,7 +20,6 @@ const register = async (req, res) => {
 
     res.status(201).send(user);
   } catch (err) {
-    console.log(err);
     res.status(500).send({ message: "Erro interno do servidor" });
   }
 };
@@ -53,7 +52,6 @@ const login = async (req, res) => {
 
     res.status(200).send({ _id, username, email, token });
   } catch (error) {
-    console.log(error);
     res.status(500).send(error);
   }
 };

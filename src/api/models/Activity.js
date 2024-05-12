@@ -31,7 +31,6 @@ const addressSchema = new mongoose.Schema({
 addressSchema.pre("save", async function (next) {
   const apiKey = process.env.HERE_MAPS_KEY;
   const formattedAddress = `${this.street}, ${this.district}, ${this.city}, ${this.state}, ${this.country}`;
-  console.log(apiKey);
   const url = `https://geocode.search.hereapi.com/v1/geocode?q=${encodeURIComponent(
     formattedAddress
   )}&apiKey=${apiKey}`;
@@ -71,10 +70,12 @@ const activitySchema = new mongoose.Schema(
         ref: "Comment",
       },
     ],
-    presence: {
-      type: Map,
-      of: Boolean,
-    },
+    presence: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
     likes: [
       {
         type: mongoose.Schema.Types.ObjectId,
