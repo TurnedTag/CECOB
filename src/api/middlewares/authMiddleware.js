@@ -3,11 +3,13 @@ const jwt = require("jsonwebtoken");
 
 const protect = async (req, res, next) => {
   try {
-    const token = req.cookies.token;
+    const authHeader = req.headers.authorization;
 
-    if (!token) {
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return res.status(401).send("Não autorizado! Faça login para continuar");
     }
+
+    const token = authHeader.split(" ")[1];
 
     const verified = jwt.verify(token, process.env.SECRET);
 

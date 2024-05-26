@@ -2,7 +2,7 @@ const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 
 const register = async (req, res) => {
-  const { username, email, password } = req.body;
+  const { username, email, password, cep } = req.body;
   try {
     const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,6}$/;
     if (!emailRegex.test(email)) {
@@ -14,7 +14,7 @@ const register = async (req, res) => {
       return res.status(400).send({ message: "Email ja em uso." });
     }
 
-    const user = await User.create({ username, email, password });
+    const user = await User.create({ username, email, password, cep });
 
     user.password = undefined;
 
@@ -48,10 +48,11 @@ const login = async (req, res) => {
       secure: true,
     });
 
-    const { _id, username } = user;
+    const { _id, username, cep } = user;
 
-    res.status(200).send({ _id, username, email, token });
+    res.status(200).send({ _id, username, email, token, cep });
   } catch (error) {
+    console.log(error);
     res.status(500).send(error);
   }
 };
@@ -59,12 +60,15 @@ const login = async (req, res) => {
 const getUser = async (req, res) => {
   const user = await User.findById(req.user._id);
 
+  console.log("User ---->", user);
+
   if (user) {
-    const { _id, name, email } = user;
+    const { _id, name, email, cep } = user;
     res.status(200).send({
       _id,
       name,
       email,
+      cep,
     });
   } else {
     res.status(400).send("Usuario não encontrado");
