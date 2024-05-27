@@ -1,8 +1,12 @@
+const { default: axios } = require("axios");
 const Activity = require("../models/Activity");
 const Comment = require("../models/Comment");
+const User = require("../models/User");
 
 const createActivity = async (req, res) => {
   const { title, description, address } = req.body;
+
+  console.log(req.body);
 
   if (!title) {
     return res.status(400).send({ message: "Title is required" });
@@ -29,20 +33,31 @@ const createActivity = async (req, res) => {
   try {
     const newActivity = await Activity.create({
       author: req.user._id,
+      title,
       description,
       address,
     });
     res.status(200).json(newActivity);
   } catch (error) {
+    console.log(error);
     res.status(500).send({ message: error.message || "Internal server error" });
   }
 };
 
 const listActivities = async (req, res) => {
   try {
-    const activities = await Activity.find().populate("author", "username");
+    const { district } = req.query;
+
+    const query = district ? { "address.district": district } : {};
+
+    const activities = await Activity.find(query).populate(
+      "author",
+      "username"
+    );
+
     res.status(200).json(activities);
   } catch (error) {
+    console.log(error);
     res.status(500).json({ message: error.message || "Internal server error" });
   }
 };
@@ -126,6 +141,7 @@ const presenceActivity = async (req, res) => {
       presenceCount: activity.presence.length,
     });
   } catch (error) {
+    console.log(error);
     res.status(500).send({ message: "Internal server error" });
   }
 };
@@ -159,11 +175,72 @@ const addCommentToActivity = async (req, res) => {
   }
 };
 
+const getTopActivitiesFromDistrict = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).send({ message: "User not found" });
+    }
+
+    const { cep } = user;
+
+    const activities = await Activity.find({
+      "address.district": await getDistrictFromCEP(cep),
+    })
+      .sort({ likes: -1 })
+      .limit(3)
+      .populate("author", "username");
+
+    res.status(200).json(activities);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ message: error.message || "Internal server error" });
+  }
+};
+
+const getDistrictFromCEP = async (cep) => {
+  const apiKey = process.env.HERE_MAPS_KEY;
+  const url = `https://geocode.search.hereapi.com/v1/geocode?q=${cep}&apiKey=${apiKey}`;
+
+  try {
+    const response = await axios.get(url);
+    if (response.status === 200 && response.data.items.length > 0) {
+      const district = response.data.items[0].address.district;
+      return district;
+    } else {
+      throw new Error("District not found");
+    }
+  } catch (error) {
+    console.error("Error getting district from CEP:", error);
+    throw error;
+  }
+};
+
+const listUserPresenceActivities = async (req, res) => {
+  const user_id = req.user._id;
+
+  try {
+    const activities = await Activity.find({
+      presence: { $in: [user_id] },
+    }).populate("author", "username");
+
+    console.log(activities);
+
+    res.status(200).json(activities);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send("Internal server error");
+  }
+};
+
 module.exports = {
-  createActivity,
-  listActivities,
   getActivity,
   likeActivity,
+  createActivity,
+  listActivities,
   presenceActivity,
   addCommentToActivity,
+  listUserPresenceActivities,
+  getTopActivitiesFromDistrict,
 };

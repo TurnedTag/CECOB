@@ -18,6 +18,8 @@ const register = async (req, res) => {
 
     user.password = undefined;
 
+    console.log(user);
+
     res.status(201).send(user);
   } catch (err) {
     res.status(500).send({ message: "Erro interno do servidor" });
